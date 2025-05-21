@@ -9,6 +9,13 @@ load_dotenv()
 
 api_key = os.getenv("KEY")
 
+
+def get_headers():
+    return {
+        'Accept': 'application/json',
+        'X-CMC_PRO_API_KEY': api_key
+    }
+
 def get_top_cryptos(quantity):
     """
     Retorna uma lista com as principais criptomoedas em ordem de valor de mercado.
@@ -21,10 +28,7 @@ def get_top_cryptos(quantity):
     """
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
 
-    headers = {
-        'Accept': 'application/json',
-        'X-CMC_PRO_API_KEY': api_key
-    }
+    headers = get_headers()
 
     params = {
         "start": "1",
@@ -50,10 +54,7 @@ def get_crypto_by_symbol(symbol):
     """
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
-    headers = {
-        'Accept': 'application/json',
-        'X-CMC_PRO_API_KEY': api_key
-    }
+    headers = get_headers()
 
     params = {
         "symbol": symbol,
@@ -81,10 +82,7 @@ def get_crypto_by_name(slug_name):
     """
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
-    headers = {
-        'Accept': 'application/json',
-        'X-CMC_PRO_API_KEY': api_key
-    }
+    headers = get_headers()
 
     params = {
         "slug": slug_name,
@@ -105,7 +103,7 @@ def show_crypto():
     Solicita uma criptomoeda ao usuário e exibe seus dados.
     Adiciona ao histórico e permite marcar como favorita.
     """
-    crypto = input('Digite o nome ou símbolo da moeda que deseja ver: ')
+    crypto = input('Digite o nome ou símbolo da moeda que deseja ver: ').strip()
     print('-~' * 25)
 
     try:
@@ -116,7 +114,7 @@ def show_crypto():
             data = get_crypto_by_name(crypto)
 
         if data["data"]:
-            print(data)
+
             for symbol in data["data"]:
                 coin = data['data'][symbol]["symbol"]
                 name = data['data'][symbol]["name"]
@@ -212,7 +210,15 @@ if __name__ == "__main__":
                     print(f"{fav['name']:<15}  | {fav['coin']:<6} | R$: {fav['price']:<12.2f}")
 
             elif option == '3':
-                count = int(input('Quantas moedas você quer ver? '))
+                
+                while True:
+                    try:
+                        count = int(input('Quantas moedas você quer ver? '))
+                    except ValueError:
+                        print('Valor invalido')
+                    else:
+                        break
+
                 data = get_top_cryptos(count)
 
                 print()
@@ -241,6 +247,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print('\nPrograma finalizado pelo usuário')
         exit()
+    
+    except ValueError as e:
+        print('Valor invalido!', e)
+        
 
 
 
